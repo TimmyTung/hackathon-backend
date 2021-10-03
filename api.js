@@ -4,7 +4,7 @@ import cors from "cors";
 import userSchema from "./userSchema.js";
 
 const app = express();
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 8080;
 
 app.listen(port, () => console.log(`listening on localhost:${port}`));
 
@@ -22,6 +22,18 @@ mongoose.connect(connectionUrl, {
 
 const db = mongoose.connection;
 
+app.get("/users/:email", (req, res) => {
+  var email = req.params.email;
+
+  userSchema.findOne({ userEmail: email }, (err, data) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send(data);
+    }
+  });
+});
+
 app.get("/users", (req, res) => {
   userSchema.find((err, data) => {
     if (err) {
@@ -35,7 +47,7 @@ app.get("/users", (req, res) => {
 app.post("/users", (req, res) => {
   const db = req.body;
 
-  userScema.create(db, (err, data) => {
+  userSchema.create(db, (err, data) => {
     if (err) {
       res.status(500).send(err);
     } else {
@@ -44,15 +56,16 @@ app.post("/users", (req, res) => {
   });
 });
 
-/*app.patch("/usersname/:", (req, res) => {
-  var updateObject = req.body; // {last_name : "smith", age: 44}
+app.patch("/users/:name", (req, res) => {
+  var updateObject = req.body;
 
   var name = req.params.name;
-  People.findOneAndUpdate({ userEmail: email }, { $set: updateObject })
+  userSchema
+    .findOneAndUpdate({ userEmail: name }, { $set: updateObject })
     .then(() => {
       res.sendStatus({ message: "success" });
     })
     .catch(err => {
       res.status(500).send(err);
     });
-});*/
+});
